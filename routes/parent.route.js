@@ -1,18 +1,18 @@
 const express = require('express');
+const parentController = require("../controllers/parent.controller");
+const validate = require('../middlewares/validate');
+const parentValidation = require('../validate/parent.validate');
 const router = express.Router();
 
-// var validate = require('../validate/student.validate')
+router
+  .route("/")
+  .post(validate(parentValidation.createClassRoom), parentController.createParent)
+  .get(validate(parentValidation.getParents), parentController.getParents);
 
-const parent_controller = require('../controllers/parent.controller');
-
-router.post('/parent/create',parent_controller.parent_create);
-
-router.get('/parent', parent_controller.parent_details);
-
-router.get('/parent/:id', parent_controller.parent_details_id);
-
-router.put('/parent/update/:id', parent_controller.parent_update);
-
-router.delete('/parent/delete/:id', parent_controller.parent_delete);
+router
+  .route("/:parentId")
+  .get(validate(parentValidation.getParent), parentController.getParent)
+  .patch(validate(parentValidation.updateParent), parentController.updateParent)
+  .delete(validate(parentValidation.deleteParent), parentController.deleteParent);
 
 module.exports = router;

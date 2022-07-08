@@ -1,95 +1,40 @@
-const Student= require('../models/student.model');
-//Create student in postman = POST
-exports.student_create = function (req, res) {
-    let student = new Student(
-        {
-            name: req.body.name,
-            age: req.body.age,
-            gender : req.body.gender
-        }
-    );
-    return student
-    .save()
-    .then((newStudent) => {
-      return res.status(201).json({
-        success: true,
-        message: 'New student created successfully',
-        newStudent: newStudent,
-      });
-    })
-    .catch((error) => {
-        console.log(error);
-        res.status(400).json({
-            success: false,
-            message: 'Server error. Please try again.',
-            error: error.message,
-      });
-    });
+const pick = require('../utils/pick');
+const studentService = require('../services/Student.services');
+
+const createStudent = async (req, res) => {
+  const student = await studentService.createStudent(req.body);
+  res.status(200).send(student);
 };
 
-
-//Show all student in postman = GET
-exports.student_details = function(req, res){
-    Student.find()
-        .then((student) =>{
-            return res.status(200).send(student )
-        })
-        .catch((err) => {
-            res.status(400).json({
-                success: false,
-                message: 'Server error. Please try again.',
-                error: err.message,
-            })
-        })
-}
-
-
-// Show students by Id in postman = GET
-exports.student_details_id = function (req, res) {
-    Student.findById(req.params.id)
-        .then((student) =>{
-            return res.status(200).send(student )
-        })
-        .catch((err) => {
-            res.status(400).json({
-              success: false,
-              message: 'This student does not exist',
-              error: err.message,
-            });
-        });
+const getStudents = async (req, res) => {
+  const filter = pick(req.query, ['parent']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const result = await studentService.queryStudents(filter, options);
+  res.send(result);
 };
 
-// Update student in postman = PUT
-exports.student_update = function (req, res) {
-    Student.findByIdAndUpdate(req.params.id, {$set: req.body})
-        .exec()
-        .then(() => {
-            res.status(200).json({
-                success: true,
-                message: 'Student is updated',
-                updateStudent: req.body,
-        });
-    })
-    .catch((err) => {
-        res.status(400).json({
-          success: false,
-          message: 'Server error. Please try again.',
-          error: err.message,
-        });
-      });
+const getStudent = async (req, res) => {
+  const student = await studentService.getStudentById(req.params.studentId);
+  if (!student) {
+    res.status(404).json({ message: 'Student not found'});
+  }
+  res.send(student);
 };
 
-//Delete student in postman = DELETE
-exports.student_delete = function (req, res) {
-    Student.findByIdAndRemove(req.params.id)
-        .exec()
-        .then(()=> res.status(200).json({
-            success: true,
-            message: 'Student is delete'
-        }))
-        .catch((err) => res.status(500).json({
-            success: false,
-            message: 'Server error. Please try again.',
-            error: err.message
-        }));
-}
+const updateStudent = async (req, res) => {
+  const student = await studentService.updateStudentById(req.params.studentId, req.body);
+  res.send(student);
+};
+
+const deleteStudent = async (req, res) => {
+  await studentService.deleteStudentById(req.params.studentId);
+  res.status(200).send();
+};
+
+module.exports = {
+  createStudent,
+  getStudents,
+  getStudent,
+  updateStudent,
+  deleteStudent,
+};

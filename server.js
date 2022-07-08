@@ -1,30 +1,33 @@
+require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
-const student = require('./routes/student.route'); // Imports routes for the products
+const mongoose = require("mongoose");
+const mongoString = process.env.DATABASE_URL;
+const studentRouter = require('./routes/student.route');
+const parentRouter = require('./routes/parent.route');
+const classRoomRouter = require('./routes/classRoom.route');
 const app = express();
 
-// Configuring the database
-const dbConfig = 'mongodb+srv://admin:admin123456@week03vinova.drsiymq.mongodb.net/?retryWrites=true&w=majority';
-const mongoose = require('mongoose');
+
+app.use(express.json());
+
 
 // Connecting to the database
-// mongoose.set('useCreateIndex', true);
-mongoose.connect(dbConfig, {
-    useNewUrlParser: true
-}).then(() => {
-    console.log("Database Connected");
-}).catch(err => {
-    console.log('Could not connect to the database. Exiting now...', err);
-    process.exit();
-});
+mongoose.connect(mongoString);
+const database = mongoose.connection;
+database.on('error', (error) => {
+    console.log(error)
+})
+database.once('connected', () => {
+    console.log('Database Connected');
+})
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+// v1 api routes
+app.use("/parents", parentRouter);
+app.use("/students", studentRouter);
+app.use("/classRooms", classRoomRouter);
 
-app.use('/api', student);
 
 
-let port = 3000;
-app.listen(port, () => {
-    console.log('Server start at Port ' + port);
-});
+app.listen(process.env.PORT, () =>
+console.log(`Server start at port http://localhost:${process.env.PORT}`)
+);

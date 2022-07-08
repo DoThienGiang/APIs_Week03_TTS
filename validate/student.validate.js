@@ -1,20 +1,31 @@
-module.exports.postCreate = function(req, res, next){
-    var errors = []
-    if(!req.body.name){
-        errors.push('Name is required.')
-    }
-    if(!req.body.age){
-        errors.push('Age is required.')
-    }
-    if(!req.body.gender){
-        errors.push('Gender is required.')
-    }
-    if(errors.length){
-        res.render('student/create',{
-            errors: errors,
-            values : req.body
-        })
-        return;
-    }
-    next()
-}
+const Joi = require ("Joi")
+
+const createStudent = {
+  body: Joi.object().keys({
+    name: Joi.string().required(),
+    age: Joi.string().required(),
+    gender: Joi.string().required(),
+  }),
+};
+
+const getStudents = {
+  query: Joi.object().keys({
+    name: Joi.string(),
+    age: Joi.string(),
+    gender: Joi.string(),
+  }),
+};
+
+const updateStudent = {
+  body: Joi.object().keys({
+    name: Joi.string(),
+    age: Joi.string(),
+    gender: Joi.string(),
+  }),
+};
+
+
+
+
+
+export { createStudent, getStudents, getStudent, updateStudent, deleteStudent };
